@@ -1,6 +1,6 @@
 {
   "name": "mihomo-party",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "Mihomo Party",
   "main": "./out/main/index.js",
   "author": "mihomo-party-org",
@@ -31,7 +31,8 @@
     "chokidar": "^4.0.1",
     "dayjs": "^1.11.13",
     "express": "^5.0.1",
-    "webdav": "^5.7.1",
+    "iconv-lite": "^0.6.3",
+    "webdav": "legacy",
     "ws": "^8.18.0",
     "yaml": "^2.6.0"
   },
