@@ -5,6 +5,7 @@ import { useGroups } from '@renderer/hooks/use-groups'
 import { mihomoCloseAllConnections, patchMihomoConfig } from '@renderer/utils/ipc'
 import { Key } from 'react'
 
+
 const OutboundModeSwitcher: React.FC = () => {
   const { controledMihomoConfig, patchControledMihomoConfig } = useControledMihomoConfig()
   const { mutate: mutateGroups } = useGroups()
@@ -20,8 +21,11 @@ const OutboundModeSwitcher: React.FC = () => {
     }
     mutateGroups()
     window.electron.ipcRenderer.send('updateTrayMenu')
+    window.electron.ipcRenderer.send('updateTrayIcon')
   }
+
   if (!mode) return null
+
   return (
     <Tabs
       fullWidth

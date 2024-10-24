@@ -1,4 +1,4 @@
-import { app, globalShortcut, ipcMain, Notification } from 'electron'
+import { app, globalShortcut, ipcMain, Notification, Tray } from 'electron'
 import { mainWindow, triggerMainWindow } from '..'
 import {
   getAppConfig,
@@ -10,6 +10,8 @@ import { triggerSysProxy } from '../sys/sysproxy'
 import { patchMihomoConfig } from '../core/mihomoApi'
 import { quitWithoutCore, restartCore } from '../core/manager'
 import { floatingWindow, triggerFloatingWindow } from './floatingWindow'
+
+export let tray: Tray | null = null
 
 export async function registerShortcut(
   oldShortcut: string,
@@ -49,6 +51,7 @@ export async function registerShortcut(
         } catch {
           // ignore
         } finally {
+          ipcMain.emit('updateTrayIcon')
           ipcMain.emit('updateTrayMenu')
         }
       })
