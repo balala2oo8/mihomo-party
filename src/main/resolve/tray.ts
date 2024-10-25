@@ -7,6 +7,9 @@ import {
   patchControledMihomoConfig
 } from '../config'
 import icoIcon from '../../../resources/icon.ico?asset'
+import icoIconDark from '../../../resources/icon_dark.ico?asset'
+import icoIconRed from '../../../resources/icon_red.ico?asset'
+import icoIconGreen from '../../../resources/icon_green.ico?asset'
 import pngIcon from '../../../resources/icon.png?asset'
 import templateIcon from '../../../resources/iconTemplate.png?asset'
 import {
@@ -110,6 +113,7 @@ export const buildContextMenu = async (): Promise<Menu> => {
       click: async (): Promise<void> => {
         await patchControledMihomoConfig({ mode: 'rule' })
         await patchMihomoConfig({ mode: 'rule' })
+        await updateTrayIcon()
         mainWindow?.webContents.send('controledMihomoConfigUpdated')
         mainWindow?.webContents.send('groupsUpdated')
         ipcMain.emit('updateTrayMenu')
@@ -124,6 +128,7 @@ export const buildContextMenu = async (): Promise<Menu> => {
       click: async (): Promise<void> => {
         await patchControledMihomoConfig({ mode: 'global' })
         await patchMihomoConfig({ mode: 'global' })
+        await updateTrayIcon()
         mainWindow?.webContents.send('controledMihomoConfigUpdated')
         mainWindow?.webContents.send('groupsUpdated')
         ipcMain.emit('updateTrayMenu')
@@ -138,6 +143,7 @@ export const buildContextMenu = async (): Promise<Menu> => {
       click: async (): Promise<void> => {
         await patchControledMihomoConfig({ mode: 'direct' })
         await patchMihomoConfig({ mode: 'direct' })
+        await updateTrayIcon()
         mainWindow?.webContents.send('controledMihomoConfigUpdated')
         mainWindow?.webContents.send('groupsUpdated')
         ipcMain.emit('updateTrayMenu')
@@ -160,6 +166,7 @@ export const buildContextMenu = async (): Promise<Menu> => {
           // ignore
         } finally {
           ipcMain.emit('updateTrayMenu')
+          ipcMain.emit('updateTrayIcon')
         }
       }
     },
@@ -284,6 +291,19 @@ export const buildContextMenu = async (): Promise<Menu> => {
   return Menu.buildFromTemplate(contextMenu)
 }
 
+export async function updateTrayIcon(): Promise<void> {
+  const { mode } = await getControledMihomoConfig()
+  const { sysProxy } = await getAppConfig()
+  let ico = icoIconDark
+  if (sysProxy.enable) {
+    if (mode === 'rule') ico = icoIcon
+    if (mode === 'global') ico = icoIconRed
+    if (mode === 'direct') ico = icoIconGreen
+  }
+  if (tray) tray?.setImage(ico)
+  else tray = new Tray(ico)
+}
+
 export async function createTray(): Promise<void> {
   const { useDockIcon = true } = await getAppConfig()
   if (process.platform === 'linux') {
@@ -297,7 +317,7 @@ export async function createTray(): Promise<void> {
     tray = new Tray(icon)
   }
   if (process.platform === 'win32') {
-    tray = new Tray(icoIcon)
+    await updateTrayIcon()
   }
   tray?.setToolTip('Mihomo Party')
   tray?.setIgnoreDoubleClickEvents(true)
@@ -323,6 +343,9 @@ export async function createTray(): Promise<void> {
     })
     tray?.addListener('right-click', async () => {
       await updateTrayMenu()
+    })
+    ipcMain.on('updateTrayIcon', async () => {
+      await updateTrayIcon()
     })
   }
   if (process.platform === 'linux') {

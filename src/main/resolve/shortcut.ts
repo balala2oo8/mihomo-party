@@ -50,6 +50,7 @@ export async function registerShortcut(
           // ignore
         } finally {
           ipcMain.emit('updateTrayMenu')
+          ipcMain.emit('updateTrayIcon')
         }
       })
     }

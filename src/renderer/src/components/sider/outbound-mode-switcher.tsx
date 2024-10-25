@@ -20,6 +20,7 @@ const OutboundModeSwitcher: React.FC = () => {
     }
     mutateGroups()
     window.electron.ipcRenderer.send('updateTrayMenu')
+    window.electron.ipcRenderer.send('updateTrayIcon')
   }
   if (!mode) return null
   return (
