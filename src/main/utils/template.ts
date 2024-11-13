@@ -63,6 +63,7 @@ export const defaultControledMihomoConfig: Partial<IMihomoConfig> = {
     'auto-redirect': false,
     'auto-detect-interface': true,
     'dns-hijack': ['any:53'],
+    'route-exclude-address': [],
     mtu: 1500
   },
   dns: {
@@ -73,8 +74,9 @@ export const defaultControledMihomoConfig: Partial<IMihomoConfig> = {
     'fake-ip-filter': ['*', '+.lan', '+.local', 'time.*.com', 'ntp.*.com', '+.market.xiaomi.com'],
     'use-hosts': false,
     'use-system-hosts': false,
-    nameserver: ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
-    'proxy-server-nameserver': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query']
+    nameserver: ['https://120.53.53.53/dns-query', 'https://223.5.5.5/dns-query'],
+    'proxy-server-nameserver': ['https://120.53.53.53/dns-query', 'https://223.5.5.5/dns-query'],
+    'direct-nameserver': []
   },
   sniffer: {
     enable: true,
