@@ -31,6 +31,8 @@ import {
   removeProfileItem,
   changeCurrentProfile,
   getProfileStr,
+  getFileStr,
+  setFileStr,
   setProfileStr,
   updateProfileItem,
   setProfileConfig,
@@ -59,6 +61,7 @@ import {
   openFile,
   openUWPTool,
   readTextFile,
+  resetAppConfig,
   setNativeTheme,
   setupFirewall
 } from '../sys/misc'
@@ -151,6 +154,8 @@ export function registerIpcMainHandlers(): void {
   ipcMain.handle('getCurrentProfileItem', ipcErrorWrapper(getCurrentProfileItem))
   ipcMain.handle('getProfileItem', (_e, id) => ipcErrorWrapper(getProfileItem)(id))
   ipcMain.handle('getProfileStr', (_e, id) => ipcErrorWrapper(getProfileStr)(id))
+  ipcMain.handle('getFileStr', (_e, path) => ipcErrorWrapper(getFileStr)(path))
+  ipcMain.handle('setFileStr', (_e, path, str) => ipcErrorWrapper(setFileStr)(path, str))
   ipcMain.handle('setProfileStr', (_e, id, str) => ipcErrorWrapper(setProfileStr)(id, str))
   ipcMain.handle('updateProfileItem', (_e, item) => ipcErrorWrapper(updateProfileItem)(item))
   ipcMain.handle('changeCurrentProfile', (_e, id) => ipcErrorWrapper(changeCurrentProfile)(id))
@@ -242,6 +247,7 @@ export function registerIpcMainHandlers(): void {
   ipcMain.handle('alert', (_e, msg) => {
     dialog.showErrorBox('Mihomo Party', msg)
   })
+  ipcMain.handle('resetAppConfig', resetAppConfig)
   ipcMain.handle('relaunchApp', () => {
     app.relaunch()
     app.quit()

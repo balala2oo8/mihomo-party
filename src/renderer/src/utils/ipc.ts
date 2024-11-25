@@ -151,6 +151,14 @@ export async function getProfileStr(id: string): Promise<string> {
   return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('getProfileStr', id))
 }
 
+export async function getFileStr(id: string): Promise<string> {
+  return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('getFileStr', id))
+}
+
+export async function setFileStr(id: string, str: string): Promise<void> {
+  return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('setFileStr', id, str))
+}
+
 export async function setProfileStr(id: string, str: string): Promise<void> {
   return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('setProfileStr', id, str))
 }
@@ -373,6 +381,10 @@ export async function openFile(
 
 export async function openDevTools(): Promise<void> {
   return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('openDevTools'))
+}
+
+export async function resetAppConfig(): Promise<void> {
+  return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('resetAppConfig'))
 }
 
 export async function createHeapSnapshot(): Promise<void> {
