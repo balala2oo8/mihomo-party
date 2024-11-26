@@ -11,7 +11,9 @@ const latest = {
 }
 
 
-changelog+=`<div align=center>[![Release Downloads](https://img.shields.io/github/downloads/balala2oo8/mihomo-party/${version}/total?style=flat-square&logo=github)](https://img.shields.io/github/downloads/balala2oo8/mihomo-party/vVERSION/)</div>`
+changelog += `<div align=center>\n\n`
+changelog += `[![Release Downloads](https://img.shields.io/github/downloads/balala2oo8/mihomo-party/${version}/total?style=flat-square&logo=github)](https://img.shields.io/github/downloads/balala2oo8/mihomo-party/${version}/)\n\n`
+changelog += `</div>\n\n`
 
 changelog += '\n### 下载地址：\n\n#### Windows10/11：\n\n'
 changelog += `- 安装版：[64位](${downloadUrl}/mihomo-party-windows-${version}-x64-setup.exe) | [32位](${downloadUrl}/mihomo-party-windows-${version}-ia32-setup.exe) | [ARM64](${downloadUrl}/mihomo-party-windows-${version}-arm64-setup.exe)\n\n`
