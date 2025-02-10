@@ -8,49 +8,67 @@ import Viewer from './viewer'
 import useSWR from 'swr'
 import SettingCard from '../base/base-setting-card'
 import SettingItem from '../base/base-setting-item'
-import { Button, Chip } from '@nextui-org/react'
+import { Button, Chip } from '@heroui/react'
 import { IoMdRefresh } from 'react-icons/io'
 import { CgLoadbarDoc } from 'react-icons/cg'
 import { MdEditDocument } from 'react-icons/md'
-import dayjs from 'dayjs'
+import dayjs from '@renderer/utils/dayjs'
 import { calcTraffic } from '@renderer/utils/calc'
 import { getHash } from '@renderer/utils/hash'
-
+import { useTranslation } from 'react-i18next'
 const ProxyProvider: React.FC = () => {
+  const { t } = useTranslation()
   const [showDetails, setShowDetails] = useState({
     show: false,
     path: '',
     type: '',
-    title: ''
+    title: '',
+    privderType: ''
   })
-
   useEffect(() => {
-    const fetchProviderPath = async (name: string): Promise<void> => {
-      try {
-        const providers = await getRuntimeConfig()
-        const provider = providers['proxy-providers'][name]
-        setShowDetails((prev) => ({
-          ...prev,
-          show: true,
-          path: provider?.path || `proxies/${getHash(provider?.url)}`
-        }))
-      } catch {
-        setShowDetails((prev) => ({ ...prev, path: '' }))
+    if (showDetails.title) {
+      const fetchProviderPath = async (name: string): Promise<void> => {
+        try {
+          const providers= await getRuntimeConfig()
+          const provider = providers['proxy-providers'][name]
+          if (provider) {
+            setShowDetails((prev) => ({
+              ...prev,
+              show: true,
+              path: provider?.path || `proxies/${getHash(provider?.url)}`
+            }))
+          }
+        } catch {
+          setShowDetails((prev) => ({ ...prev, path: '' }))
+        }
       }
+      fetchProviderPath(showDetails.title)
     }
-    if (showDetails.path) {
-      fetchProviderPath(showDetails.path)
-    }
-  }, [showDetails.path])
+  }, [showDetails.title])
 
   const { data, mutate } = useSWR('mihomoProxyProviders', mihomoProxyProviders)
   const providers = useMemo(() => {
     if (!data) return []
-    if (!data.providers) return []
-    return Object.keys(data.providers)
-      .map((key) => data.providers[key])
-      .filter((provider) => {
-        return 'subscriptionInfo' in provider
+    return Object.values(data.providers)
+      .map(provider => {
+        if (provider.vehicleType === 'Inline' || provider.vehicleType === 'File') {
+          return {
+            ...provider,
+            subscriptionInfo: null
+          }
+        }
+        return provider
+      })
+
+      .filter(provider => 'subscriptionInfo' in provider)
+      .sort((a, b) => {
+        if (a.vehicleType === 'File' && b.vehicleType !== 'File') {
+          return -1
+        }
+        if (a.vehicleType !== 'File' && b.vehicleType === 'File') {
+          return 1
+        }
+        return 0
       })
   }, [data])
   const [updating, setUpdating] = useState(Array(providers.length).fill(false))
@@ -84,10 +102,11 @@ const ProxyProvider: React.FC = () => {
           path={showDetails.path}
           type={showDetails.type}
           title={showDetails.title}
-          onClose={() => setShowDetails({ show: false, path: '', type: '', title: '' })}
+          privderType={showDetails.privderType}
+          onClose={() => setShowDetails({ show: false, path: '', type: '', title: '', privderType: '' })}
         />
       )}
-      <SettingItem title="代理集合" divider>
+      <SettingItem title={t('resources.proxyProviders.title')} divider>
         <Button
           size="sm"
           color="primary"
@@ -97,7 +116,7 @@ const ProxyProvider: React.FC = () => {
             })
           }}
         >
-          更新全部
+          {t('resources.proxyProviders.updateAll')}
         </Button>
       </SettingItem>
       {providers.map((provider, index) => (
@@ -118,12 +137,13 @@ const ProxyProvider: React.FC = () => {
               </Button> */}
               <Button
                 isIconOnly
-                title={provider.vehicleType == 'File' ? '编辑' : '查看'}
+                title={provider.vehicleType == 'File' ? t('common.editor.edit') : t('common.viewer.view')}
                 className="ml-2"
                 size="sm"
                 onPress={() => {
                   setShowDetails({
                     show: false,
+                    privderType: 'proxy-providers',
                     path: provider.name,
                     type: provider.vehicleType,
                     title: provider.name
@@ -138,7 +158,7 @@ const ProxyProvider: React.FC = () => {
               </Button>
               <Button
                 isIconOnly
-                title="更新"
+                title={t('common.updater.update')}
                 className="ml-2"
                 size="sm"
                 onPress={() => {
@@ -163,7 +183,7 @@ const ProxyProvider: React.FC = () => {
               <div className="h-[32px] leading-[32px] text-foreground-500">
                 {provider.subscriptionInfo.Expire
                   ? dayjs.unix(provider.subscriptionInfo.Expire).format('YYYY-MM-DD')
-                  : '长期有效'}
+                  : t('profiles.neverExpire')}
               </div>
             </SettingItem>
           )}

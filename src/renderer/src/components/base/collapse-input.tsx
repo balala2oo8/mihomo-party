@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import { Input, InputProps } from '@nextui-org/react'
+import { Input, InputProps } from '@heroui/react'
 import { FaSearch } from 'react-icons/fa'
 
 interface CollapseInputProps extends InputProps {
@@ -31,7 +31,7 @@ const CollapseInput: React.FC<CollapseInputProps> = (props) => {
             <FaSearch title={title} />
           </div>
         }
-        onClick={(e) => {
+        onPress={(e) => {
           e.stopPropagation()
           inputRef.current?.focus()
         }}

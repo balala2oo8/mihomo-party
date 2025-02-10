@@ -10,10 +10,10 @@ import {
   DropdownTrigger,
   Progress,
   Tooltip
-} from '@nextui-org/react'
+} from '@heroui/react'
 import { calcPercent, calcTraffic } from '@renderer/utils/calc'
 import { IoMdMore, IoMdRefresh } from 'react-icons/io'
-import dayjs from 'dayjs'
+import dayjs from '@renderer/utils/dayjs'
 import React, { Key, useEffect, useMemo, useState } from 'react'
 import EditFileModal from './edit-file-modal'
 import EditInfoModal from './edit-info-modal'
@@ -21,6 +21,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { openFile } from '@renderer/utils/ipc'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   info: IProfileItem
@@ -29,7 +30,7 @@ interface Props {
   updateProfileItem: (item: IProfileItem) => Promise<void>
   removeProfileItem: (id: string) => Promise<void>
   mutateProfileConfig: () => void
-  onClick: () => Promise<void>
+  onPress: () => Promise<void>
 }
 
 interface MenuItem {
@@ -40,13 +41,14 @@ interface MenuItem {
   className: string
 }
 const ProfileItem: React.FC<Props> = (props) => {
+  const { t } = useTranslation()
   const {
     info,
     addProfileItem,
     removeProfileItem,
     mutateProfileConfig,
     updateProfileItem,
-    onClick,
+    onPress,
     isCurrent
   } = props
   const extra = info?.extra
@@ -75,28 +77,28 @@ const ProfileItem: React.FC<Props> = (props) => {
     const list = [
       {
         key: 'edit-info',
-        label: '编辑信息',
+        label: t('profiles.editInfo.title'),
         showDivider: false,
         color: 'default',
         className: ''
       } as MenuItem,
       {
         key: 'edit-file',
-        label: '编辑文件',
+        label: t('profiles.editFile.title'),
         showDivider: false,
         color: 'default',
         className: ''
       } as MenuItem,
       {
         key: 'open-file',
-        label: '打开文件',
+        label: t('profiles.openFile'),
         showDivider: true,
         color: 'default',
         className: ''
       } as MenuItem,
       {
         key: 'delete',
-        label: '删除',
+        label: t('common.delete'),
         showDivider: false,
         color: 'danger',
         className: 'text-danger'
@@ -105,14 +107,14 @@ const ProfileItem: React.FC<Props> = (props) => {
     if (info.home) {
       list.unshift({
         key: 'home',
-        label: '主页',
+        label: t('profiles.home'),
         showDivider: false,
         color: 'default',
         className: ''
       } as MenuItem)
     }
     return list
-  }, [info])
+  }, [info, t])
 
   const onMenuAction = async (key: Key): Promise<void> => {
     switch (key) {
@@ -172,12 +174,13 @@ const ProfileItem: React.FC<Props> = (props) => {
         />
       )}
       <Card
+        as="div"
         fullWidth
         isPressable
         onPress={() => {
           if (disableSelect) return
           setSelecting(true)
-          onClick().finally(() => {
+          onPress().finally(() => {
             setSelecting(false)
           })
         }}
@@ -253,7 +256,7 @@ const ProfileItem: React.FC<Props> = (props) => {
                       await patchAppConfig({ profileDisplayDate: 'update' })
                     }}
                   >
-                    {extra.expire ? dayjs.unix(extra.expire).format('YYYY-MM-DD') : '长期有效'}
+                    {extra.expire ? dayjs.unix(extra.expire).format('YYYY-MM-DD') : t('profiles.neverExpire')}
                   </Button>
                 ) : (
                   <Button
@@ -280,7 +283,7 @@ const ProfileItem: React.FC<Props> = (props) => {
                   variant="bordered"
                   className={`${isCurrent ? 'text-primary-foreground border-primary-foreground' : 'border-primary text-primary'}`}
                 >
-                  远程
+                    {t('profiles.remote')}
                 </Chip>
                 <small>{dayjs(info.updated).fromNow()}</small>
               </div>
@@ -294,13 +297,14 @@ const ProfileItem: React.FC<Props> = (props) => {
                   variant="bordered"
                   className={`${isCurrent ? 'text-primary-foreground border-primary-foreground' : 'border-primary text-primary'}`}
                 >
-                  本地
+                    {t('profiles.local')}
                 </Chip>
               </div>
             )}
             {extra && (
               <Progress
                 className="w-full"
+                  aria-label={t('profiles.trafficUsage')}
                 classNames={{
                   indicator: isCurrent ? 'bg-primary-foreground' : 'bg-foreground'
                 }}

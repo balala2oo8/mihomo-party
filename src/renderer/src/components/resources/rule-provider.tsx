@@ -9,48 +9,56 @@ import { Fragment, useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import SettingCard from '../base/base-setting-card'
 import SettingItem from '../base/base-setting-item'
-import { Button, Chip } from '@nextui-org/react'
+import { Button, Chip } from '@heroui/react'
 import { IoMdRefresh } from 'react-icons/io'
 import { CgLoadbarDoc } from 'react-icons/cg'
 import { MdEditDocument } from 'react-icons/md'
-import dayjs from 'dayjs'
+import dayjs from '@renderer/utils/dayjs'
+import { useTranslation } from 'react-i18next'
 
 const RuleProvider: React.FC = () => {
+  const { t } = useTranslation()
   const [showDetails, setShowDetails] = useState({
     show: false,
     path: '',
     type: '',
     title: '',
-    format: ''
+    format: '',
+    privderType: ''
   })
   useEffect(() => {
-    const fetchProviderPath = async (name: string): Promise<void> => {
-      try {
-        const providers = await getRuntimeConfig()
-        const provider = providers['rule-providers'][name]
-        setShowDetails((prev) => ({
-          ...prev,
-          show: true,
-          path: provider?.path || `rules/${getHash(provider?.url)}`
-        }))
-      } catch {
-        setShowDetails((prev) => ({ ...prev, path: '' }))
+    if (showDetails.title) {
+      const fetchProviderPath = async (name: string): Promise<void> => {
+        try {
+          const providers= await getRuntimeConfig()
+          const provider = providers['rule-providers'][name]
+          if (provider) {
+            setShowDetails((prev) => ({
+              ...prev,
+              show: true,
+              path: provider?.path || `rules/${getHash(provider?.url)}`
+            }))
+          }
+        } catch {
+          setShowDetails((prev) => ({ ...prev, path: '' }))
+        }
       }
+      fetchProviderPath(showDetails.title)
     }
-    if (showDetails.path != '') {
-      fetchProviderPath(showDetails.path)
-    }
-  }, [showDetails.path])
-
-  useEffect(() => {
-    console.log(showDetails)
-  }, [showDetails])
+  }, [showDetails.title])
 
   const { data, mutate } = useSWR('mihomoRuleProviders', mihomoRuleProviders)
   const providers = useMemo(() => {
     if (!data) return []
-    if (!data.providers) return []
-    return Object.keys(data.providers).map((key) => data.providers[key])
+    return Object.values(data.providers).sort((a, b) => {
+      if (a.vehicleType === 'File' && b.vehicleType !== 'File') {
+        return -1
+      }
+      if (a.vehicleType !== 'File' && b.vehicleType === 'File') {
+        return 1
+      }
+      return 0
+    })
   }, [data])
   const [updating, setUpdating] = useState(Array(providers.length).fill(false))
 
@@ -84,10 +92,11 @@ const RuleProvider: React.FC = () => {
           type={showDetails.type}
           title={showDetails.title}
           format={showDetails.format}
-          onClose={() => setShowDetails({ show: false, path: '', type: '', title: '', format: '' })}
+          privderType={showDetails.privderType}
+          onClose={() => setShowDetails({ show: false, path: '', type: '', title: '', format: '', privderType: '' })}
         />
       )}
-      <SettingItem title="规则集合" divider>
+      <SettingItem title={t('resources.ruleProviders.title')} divider>
         <Button
           size="sm"
           color="primary"
@@ -97,7 +106,7 @@ const RuleProvider: React.FC = () => {
             })
           }}
         >
-          更新全部
+          {t('resources.ruleProviders.updateAll')}
         </Button>
       </SettingItem>
       {providers.map((provider, index) => (
@@ -115,12 +124,13 @@ const RuleProvider: React.FC = () => {
               {provider.format !== 'MrsRule' && (
                 <Button
                   isIconOnly
-                  title={provider.vehicleType == 'File' ? '编辑' : '查看'}
+                  title={provider.vehicleType == 'File' ? t('common.editor.edit') : t('common.viewer.view')}
                   className="ml-2"
                   size="sm"
                   onPress={() => {
                     setShowDetails({
                       show: false,
+                      privderType: 'rule-providers',
                       path: provider.name,
                       type: provider.vehicleType,
                       title: provider.name,
@@ -137,7 +147,7 @@ const RuleProvider: React.FC = () => {
               )}
               <Button
                 isIconOnly
-                title="更新"
+                title={t('common.updater.update')}
                 className="ml-2"
                 size="sm"
                 onPress={() => {

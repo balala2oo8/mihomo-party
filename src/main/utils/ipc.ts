@@ -50,6 +50,7 @@ import {
   startSubStoreBackendServer,
   stopSubStoreFrontendServer,
   stopSubStoreBackendServer,
+  downloadSubStore,
   subStoreFrontendPort,
   subStorePort
 } from '../resolve/server'
@@ -87,6 +88,7 @@ import { getGistUrl } from '../resolve/gistApi'
 import { getImageDataURL } from './image'
 import { startMonitor } from '../resolve/trafficMonitor'
 import { closeFloatingWindow, showContextMenu, showFloatingWindow } from '../resolve/floatingWindow'
+import i18next from 'i18next'
 
 function ipcErrorWrapper<T>( // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: (...args: any[]) => Promise<T> // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -201,6 +203,7 @@ export function registerIpcMainHandlers(): void {
   ipcMain.handle('stopSubStoreFrontendServer', () => ipcErrorWrapper(stopSubStoreFrontendServer)())
   ipcMain.handle('startSubStoreBackendServer', () => ipcErrorWrapper(startSubStoreBackendServer)())
   ipcMain.handle('stopSubStoreBackendServer', () => ipcErrorWrapper(stopSubStoreBackendServer)())
+  ipcMain.handle('downloadSubStore', () => ipcErrorWrapper(downloadSubStore)())
 
   ipcMain.handle('subStorePort', () => subStorePort)
   ipcMain.handle('subStoreFrontendPort', () => subStoreFrontendPort)
@@ -212,7 +215,9 @@ export function registerIpcMainHandlers(): void {
   })
   ipcMain.handle('setTitleBarOverlay', (_e, overlay) =>
     ipcErrorWrapper(async (overlay): Promise<void> => {
-      mainWindow?.setTitleBarOverlay(overlay)
+      if (mainWindow && typeof mainWindow.setTitleBarOverlay === 'function') {
+        mainWindow.setTitleBarOverlay(overlay)
+      }
     })(overlay)
   )
   ipcMain.handle('setAlwaysOnTop', (_e, alwaysOnTop) => {
@@ -254,4 +259,11 @@ export function registerIpcMainHandlers(): void {
   })
   ipcMain.handle('quitWithoutCore', ipcErrorWrapper(quitWithoutCore))
   ipcMain.handle('quitApp', () => app.quit())
+  
+  // Add language change handler
+  ipcMain.handle('changeLanguage', async (_e, lng) => {
+    await i18next.changeLanguage(lng)
+    // 触发托盘菜单更新
+    ipcMain.emit('updateTrayMenu')
+  })
 }

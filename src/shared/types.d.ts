@@ -142,6 +142,8 @@ interface IMihomoProxy {
   type: MihomoProxyType
   udp: boolean
   xudp: boolean
+  mptcp: boolean
+  smux: boolean
 }
 
 interface IMihomoGroup {
@@ -215,6 +217,10 @@ interface ISysProxyConfig {
 
 interface IAppConfig {
   core: 'mihomo' | 'mihomo-alpha'
+  disableLoopbackDetector: boolean
+  disableEmbedCA: boolean
+  disableSystemCA: boolean
+  skipSafePathCheck: boolean
   proxyDisplayMode: 'simple' | 'full'
   proxyDisplayOrder: 'default' | 'delay' | 'name'
   profileDisplayDate?: 'expire' | 'update'
@@ -289,6 +295,7 @@ interface IAppConfig {
   directModeShortcut?: string
   restartAppShortcut?: string
   quitWithoutCoreShortcut?: string
+  language?: 'zh-CN' | 'en-US'
 }
 
 interface IMihomoTunConfig {
@@ -352,6 +359,8 @@ interface IMihomoSnifferConfig {
   'force-dns-mapping'?: boolean
   'force-domain'?: string[]
   'skip-domain'?: string[]
+  'skip-dst-address'?: string[]
+  'skip-src-address'?: string[]
   sniff?: {
     HTTP?: {
       ports: (number | string)[]

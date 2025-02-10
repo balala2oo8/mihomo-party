@@ -1,16 +1,18 @@
-import { Button, Card, CardBody, CardFooter, Tooltip } from '@nextui-org/react'
+import { Button, Card, CardBody, CardFooter, Tooltip } from '@heroui/react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import SubStoreIcon from '../base/substore-icon'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   iconOnly?: boolean
 }
 
 const SubStoreCard: React.FC<Props> = (props) => {
+  const { t } = useTranslation()
   const { appConfig } = useAppConfig()
   const { iconOnly } = props
   const { substoreCardStatus = 'col-span-1', useSubStore = true } = appConfig || {}
@@ -32,7 +34,7 @@ const SubStoreCard: React.FC<Props> = (props) => {
   if (iconOnly) {
     return (
       <div className={`${substoreCardStatus} ${!useSubStore ? 'hidden' : ''} flex justify-center`}>
-        <Tooltip content="Sub-Store" placement="right">
+        <Tooltip content={t('sider.cards.substore')} placement="right">
           <Button
             size="sm"
             isIconOnly
@@ -84,7 +86,7 @@ const SubStoreCard: React.FC<Props> = (props) => {
           <h3
             className={`text-md font-bold ${match ? 'text-primary-foreground' : 'text-foreground'}`}
           >
-            Sub-Store
+            {t('sider.cards.substore')}
           </h3>
         </CardFooter>
       </Card>
