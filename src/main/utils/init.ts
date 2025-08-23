@@ -22,8 +22,10 @@ import {
   defaultProfileConfig
 } from './template'
 import yaml from 'yaml'
-import { mkdir, writeFile, copyFile, rm, readdir } from 'fs/promises'
+import { mkdir, writeFile, rm, readdir, cp, stat } from 'fs/promises'
 import { existsSync } from 'fs'
+import { exec } from 'child_process'
+import { promisify } from 'util'
 import path from 'path'
 import {
   startPacServer,
@@ -40,7 +42,32 @@ import {
 import { app } from 'electron'
 import { startSSIDCheck } from '../sys/ssid'
 
+async function fixDataDirPermissions(): Promise<void> {
+  if (process.platform !== 'darwin') return
+
+  const dataDirPath = dataDir()
+  if (!existsSync(dataDirPath)) return
+
+  try {
+    const stats = await stat(dataDirPath)
+    const currentUid = process.getuid?.() || 0
+
+    if (stats.uid === 0 && currentUid !== 0) {
+      const execPromise = promisify(exec)
+      const username = process.env.USER || process.env.LOGNAME
+      if (username) {
+        await execPromise(`chown -R "${username}:staff" "${dataDirPath}"`)
+        await execPromise(`chmod -R u+rwX "${dataDirPath}"`)
+      }
+    }
+  } catch {
+    // ignore
+  }
+}
+
 async function initDirs(): Promise<void> {
+  await fixDataDirPermissions()
+
   if (!existsSync(dataDir())) {
     await mkdir(dataDir())
   }
@@ -88,13 +115,13 @@ async function initConfig(): Promise<void> {
 async function initFiles(): Promise<void> {
   const copy = async (file: string): Promise<void> => {
     const targetPath = path.join(mihomoWorkDir(), file)
-    const testTargrtPath = path.join(mihomoTestDir(), file)
+    const testTargetPath = path.join(mihomoTestDir(), file)
     const sourcePath = path.join(resourcesFilesDir(), file)
     if (!existsSync(targetPath) && existsSync(sourcePath)) {
-      await copyFile(sourcePath, targetPath)
+      await cp(sourcePath, targetPath, { recursive: true })
     }
-    if (!existsSync(testTargrtPath) && existsSync(sourcePath)) {
-      await copyFile(sourcePath, testTargrtPath)
+    if (!existsSync(testTargetPath) && existsSync(sourcePath)) {
+      await cp(sourcePath, testTargetPath, { recursive: true })
     }
   }
   await Promise.all([
@@ -102,7 +129,9 @@ async function initFiles(): Promise<void> {
     copy('geoip.metadb'),
     copy('geoip.dat'),
     copy('geosite.dat'),
-    copy('ASN.mmdb')
+    copy('ASN.mmdb'),
+    copy('sub-store.bundle.js'),
+    copy('sub-store-frontend')
   ])
 }
 

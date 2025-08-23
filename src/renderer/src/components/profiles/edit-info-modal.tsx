@@ -16,7 +16,7 @@ import {
 import React, { useState } from 'react'
 import SettingItem from '../base/base-setting-item'
 import { useOverrideConfig } from '@renderer/hooks/use-override-config'
-import { restartCore } from '@renderer/utils/ipc'
+import { restartCore, addProfileUpdater } from '@renderer/utils/ipc'
 import { MdDeleteForever } from 'react-icons/md'
 import { FaPlus } from 'react-icons/fa6'
 import { useTranslation } from 'react-i18next'
@@ -36,13 +36,15 @@ const EditInfoModal: React.FC<Props> = (props) => {
 
   const onSave = async (): Promise<void> => {
     try {
-      await updateProfileItem({
+      const updatedItem = {
         ...values,
         override: values.override?.filter(
           (i) =>
             overrideItems.find((t) => t.id === i) && !overrideItems.find((t) => t.id === i)?.global
         )
-      })
+      };
+      await updateProfileItem(updatedItem)
+      await addProfileUpdater(updatedItem)
       await restartCore()
       onClose()
     } catch (e) {
@@ -105,6 +107,15 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   value={values.interval?.toString() ?? ''}
                   onValueChange={(v) => {
                     setValues({ ...values, interval: parseInt(v) })
+                  }}
+                />
+              </SettingItem>
+              <SettingItem title={t('profiles.editInfo.fixedInterval')}>
+                <Switch
+                  size="sm"
+                  isSelected={values.allowFixedInterval ?? false}
+                  onValueChange={(v) => {
+                    setValues({ ...values, allowFixedInterval: v })
                   }}
                 />
               </SettingItem>

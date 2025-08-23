@@ -147,6 +147,10 @@ export async function updateProfileItem(item: IProfileItem): Promise<void> {
   return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('updateProfileItem', item))
 }
 
+export async function addProfileUpdater(item: IProfileItem): Promise<void> {
+  return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('addProfileUpdater', item))
+}
+
 export async function getProfileStr(id: string): Promise<string> {
   return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('getProfileStr', id))
 }
@@ -207,10 +211,8 @@ export async function triggerSysProxy(enable: boolean): Promise<void> {
   return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('triggerSysProxy', enable))
 }
 
-export async function manualGrantCorePermition(password?: string): Promise<void> {
-  return ipcErrorWrapper(
-    await window.electron.ipcRenderer.invoke('manualGrantCorePermition', password)
-  )
+export async function manualGrantCorePermition(): Promise<void> {
+  return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('manualGrantCorePermition'))
 }
 
 export async function getFilePath(ext: string[]): Promise<string[] | undefined> {
@@ -326,8 +328,8 @@ export async function startSubStoreBackendServer(): Promise<void> {
 export async function stopSubStoreBackendServer(): Promise<void> {
   return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('stopSubStoreBackendServer'))
 }
-export async function downloadSubStore(password?: string): Promise<void> {
-  return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('downloadSubStore', password))
+export async function downloadSubStore(): Promise<void> {
+  return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('downloadSubStore'))
 }
 
 export async function subStorePort(): Promise<number> {

@@ -27,7 +27,7 @@ const CoreMap = {
 const Mihomo: React.FC = () => {
   const { t } = useTranslation()
   const { appConfig, patchAppConfig } = useAppConfig()
-  const { 
+  const {
     core = 'mihomo',
     maxLogDays = 7,
     sysProxy,
@@ -136,6 +136,7 @@ const Mihomo: React.FC = () => {
               size="sm"
               aria-label={t('mihomo.selectCoreVersion')}
               selectedKeys={new Set([core])}
+              disallowEmptySelection={true}
               onSelectionChange={async (v) => {
                 handleConfigChangeWithRestart('core', v.currentKey as 'mihomo' | 'mihomo-alpha')
               }}
@@ -400,7 +401,7 @@ const Mihomo: React.FC = () => {
                       <Input
                         size="sm"
                         fullWidth
-                        placeholder="IP 段"
+                        placeholder={t('mihomo.ipSegment.placeholder')}
                         value={ipcidr || ''}
                         onValueChange={(v) => {
                           if (index === lanAllowedIpsInput.length) {
@@ -450,7 +451,7 @@ const Mihomo: React.FC = () => {
                       <Input
                         size="sm"
                         fullWidth
-                        placeholder="IP 段"
+                        placeholder={t('mihomo.username.placeholder')}
                         value={ipcidr || ''}
                         onValueChange={(v) => {
                           if (index === lanDisallowedIpsInput.length) {
@@ -702,6 +703,7 @@ const Mihomo: React.FC = () => {
               size="sm"
               aria-label={t('mihomo.selectLogLevel')}
               selectedKeys={new Set([logLevel])}
+              disallowEmptySelection={true}
               onSelectionChange={(v) => {
                 onChangeNeedRestart({ 'log-level': v.currentKey as LogLevel })
               }}
@@ -720,6 +722,7 @@ const Mihomo: React.FC = () => {
               size="sm"
               aria-label={t('mihomo.selectFindProcessMode')}
               selectedKeys={new Set([findProcessMode])}
+              disallowEmptySelection={true}
               onSelectionChange={(v) => {
                 onChangeNeedRestart({ 'find-process-mode': v.currentKey as FindProcessMode })
               }}
