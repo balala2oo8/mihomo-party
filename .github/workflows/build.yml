@@ -442,6 +442,10 @@ jobs:
         env:
           npm_config_arch: ${{ matrix.arch }}
           npm_config_target_arch: ${{ matrix.arch }}
+        run: |
+          sed -i "" -e "s/macos/catalina/" electron-builder.yml
+          chmod +x build/pkg-scripts/postinstall build/pkg-scripts/preinstall
+          pnpm build:mac --${{ matrix.arch }}
           
       - name: Generate checksums
         run: pnpm checksum .pkg
