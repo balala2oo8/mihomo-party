@@ -45,7 +45,7 @@ export async function checkUpdate(): Promise<IAppVersion | undefined> {
     getAppConfig()
   ])
   const githubUrl =
-    'https://github.com/mihomo-party-org/mihomo-party/releases/latest/download/latest.yml'
+    'https://github.com/balala2oo8/mihomo-party/releases/latest/download/latest.yml'
   const res = await tryDownload(buildDownloadUrls(githubUrl, githubProxy), {
     headers: { 'Content-Type': 'application/octet-stream' },
     proxy: { protocol: 'http', host: '127.0.0.1', port: mixedPort },
