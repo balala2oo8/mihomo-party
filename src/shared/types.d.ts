@@ -236,6 +236,11 @@ interface ISysProxyConfig {
   pacScript?: string
 }
 
+interface INetworkLatencyTarget {
+  name: string
+  url: string
+}
+
 interface IAppConfig {
   core: 'mihomo' | 'mihomo-alpha' | 'mihomo-smart' | 'mihomo-specific'
   specificVersion?: string
@@ -258,6 +263,8 @@ interface IAppConfig {
   connectionTableColumnWidths?: Record<string, number>
   connectionTableSortColumn?: string
   connectionTableSortDirection?: 'asc' | 'desc'
+  displayIcon?: boolean
+  displayAppName?: boolean
   spinFloatingIcon?: boolean
   disableTray?: boolean
   swapTrayClick?: boolean
@@ -269,6 +276,8 @@ interface IAppConfig {
   logCardStatus?: CardStatus
   hideConnectionCardWave?: boolean
   pauseSSID?: string[]
+  disableDnsOnPauseSSID?: boolean
+  controlDnsBeforePause?: boolean
   mihomoCoreCardStatus?: CardStatus
   overrideCardStatus?: CardStatus
   profileCardStatus?: CardStatus
@@ -280,6 +289,7 @@ interface IAppConfig {
   substoreCardStatus?: CardStatus
   sysproxyCardStatus?: CardStatus
   tunCardStatus?: CardStatus
+  usageCardStatus?: CardStatus
   githubToken?: string
   useSubStore: boolean
   subStoreHost?: string
@@ -308,10 +318,12 @@ interface IAppConfig {
   autoCloseConnection: boolean
   sysProxy: ISysProxyConfig
   maxLogDays: number
+  maxLogFileSize: number
   userAgent?: string
   delayTestConcurrency?: number
   delayTestUrl?: string
   delayTestTimeout?: number
+  networkLatencyTargets?: INetworkLatencyTarget[]
   subscriptionTimeout?: number
   encryptedPassword?: number[]
   controlDns?: boolean
@@ -319,6 +331,7 @@ interface IAppConfig {
   useDockIcon?: boolean
   showTraffic?: boolean
   disableTrayIconColor?: boolean
+  customTrayIcon?: string
   trayProxyGroupStyle?: 'default' | 'submenu'
   disableAnimations?: boolean
   webdavUrl?: string
@@ -353,6 +366,8 @@ interface IAppConfig {
   showTproxyPort?: number
   enableTproxyPort?: boolean
   testProfileOnStart?: boolean
+  useHotReloadProfile?: boolean
+  hotReloadProfileAutoCloseConnection?: boolean
 }
 
 interface IMihomoTunConfig {

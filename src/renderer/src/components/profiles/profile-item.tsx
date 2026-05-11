@@ -20,9 +20,11 @@ import { CSS } from '@dnd-kit/utilities'
 import { openFile } from '@renderer/utils/ipc'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { useTranslation } from 'react-i18next'
+import BaseConfirmModal from '../base/base-confirm-modal'
 import EditRulesModal from './edit-rules-modal'
 import EditInfoModal from './edit-info-modal'
 import EditFileModal from './edit-file-modal'
+import QrCodeModal from './qr-code-modal'
 
 interface Props {
   info: IProfileItem
@@ -61,6 +63,8 @@ const ProfileItem: React.FC<Props> = (props) => {
   const [openInfoEditor, setOpenInfoEditor] = useState(false)
   const [openFileEditor, setOpenFileEditor] = useState(false)
   const [openRulesEditor, setOpenRulesEditor] = useState(false)
+  const [openQrCode, setOpenQrCode] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const {
     attributes,
@@ -114,6 +118,15 @@ const ProfileItem: React.FC<Props> = (props) => {
         className: 'text-danger'
       } as MenuItem
     ]
+    if (info.type === 'remote' && info.url) {
+      list.unshift({
+        key: 'show-qrcode',
+        label: t('profiles.qrCode.show'),
+        showDivider: false,
+        color: 'default',
+        className: ''
+      } as MenuItem)
+    }
     if (info.home) {
       list.unshift({
         key: 'home',
@@ -145,11 +158,14 @@ const ProfileItem: React.FC<Props> = (props) => {
         break
       }
       case 'delete': {
-        await removeProfileItem(info.id)
-        mutateProfileConfig()
+        setShowDeleteConfirm(true)
         break
       }
 
+      case 'show-qrcode': {
+        setOpenQrCode(true)
+        break
+      }
       case 'home': {
         open(info.home)
         break
@@ -215,11 +231,27 @@ const ProfileItem: React.FC<Props> = (props) => {
     >
       {openFileEditor && <EditFileModal id={info.id} onClose={() => setOpenFileEditor(false)} />}
       {openRulesEditor && <EditRulesModal id={info.id} onClose={() => setOpenRulesEditor(false)} />}
+      {openQrCode && info.url && (
+        <QrCodeModal url={info.url} onClose={() => setOpenQrCode(false)} />
+      )}
       {openInfoEditor && (
         <EditInfoModal
           item={info}
           onClose={() => setOpenInfoEditor(false)}
           updateProfileItem={updateProfileItem}
+        />
+      )}
+      {showDeleteConfirm && (
+        <BaseConfirmModal
+          isOpen={showDeleteConfirm}
+          title={t('profiles.deleteConfirm.title')}
+          content={t('profiles.deleteConfirm.content', { name: info.name })}
+          onCancel={() => setShowDeleteConfirm(false)}
+          onConfirm={async () => {
+            await removeProfileItem(info.id)
+            mutateProfileConfig()
+            setShowDeleteConfirm(false)
+          }}
         />
       )}
 
@@ -240,10 +272,10 @@ const ProfileItem: React.FC<Props> = (props) => {
           onMouseUp={handleMouseUp}
         >
           <CardBody className="pb-1">
-            <div className="flex justify-between h-[32px]">
+            <div className="flex justify-between h-8">
               <h3
                 title={info?.name}
-                className={`text-ellipsis whitespace-nowrap overflow-hidden text-md font-bold leading-[32px] ${isCurrent ? 'text-primary-foreground' : 'text-foreground'}`}
+                className={`text-ellipsis whitespace-nowrap overflow-hidden text-md font-bold leading-8 ${isCurrent ? 'text-primary-foreground' : 'text-foreground'}`}
               >
                 {info?.name}
               </h3>
@@ -303,7 +335,7 @@ const ProfileItem: React.FC<Props> = (props) => {
                   <Button
                     size="sm"
                     variant="light"
-                    className={`h-[20px] p-1 m-0 ${isCurrent ? 'text-primary-foreground' : 'text-foreground'}`}
+                    className={`h-5 p-1 m-0 ${isCurrent ? 'text-primary-foreground' : 'text-foreground'}`}
                     onPress={async () => {
                       await patchAppConfig({ profileDisplayDate: 'update' })
                     }}
@@ -316,7 +348,7 @@ const ProfileItem: React.FC<Props> = (props) => {
                   <Button
                     size="sm"
                     variant="light"
-                    className={`h-[20px] p-1 m-0 ${isCurrent ? 'text-primary-foreground' : 'text-foreground'}`}
+                    className={`h-5 p-1 m-0 ${isCurrent ? 'text-primary-foreground' : 'text-foreground'}`}
                     onPress={async () => {
                       await patchAppConfig({ profileDisplayDate: 'expire' })
                     }}

@@ -6,7 +6,8 @@ import { tray } from '../resolve/tray'
 import { calcTraffic } from '../utils/calc'
 import { floatingWindow } from '../resolve/floatingWindow'
 import { createLogger } from '../utils/logger'
-import { getRuntimeConfig } from './factory'
+import { mihomoWorkConfigPath } from '../utils/dirs'
+import { generateProfile, getRuntimeConfig } from './factory'
 import { getMihomoIpcPath } from './manager'
 
 const mihomoApiLogger = createLogger('MihomoApi')
@@ -189,7 +190,7 @@ export const mihomoGroupDelay = async (group: string, url?: string): Promise<IMi
 
 export const mihomoUpgrade = async (): Promise<void> => {
   const instance = await getAxios()
-  return await instance.post('/upgrade')
+  return await instance.post('/upgrade', undefined, { timeout: 90000 })
 }
 
 export const mihomoUpgradeUI = async (): Promise<void> => {
@@ -197,31 +198,15 @@ export const mihomoUpgradeUI = async (): Promise<void> => {
   return await instance.post('/upgrade/ui')
 }
 
-export const mihomoUpgradeConfig = async (): Promise<void> => {
-  mihomoApiLogger.info('mihomoUpgradeConfig called')
-
-  try {
-    const instance = await getAxios()
-    mihomoApiLogger.info('axios instance obtained')
-    const { diffWorkDir = false } = await getAppConfig()
-    const { current } = await import('../config').then((mod) => mod.getProfileConfig(true))
-    const { mihomoWorkConfigPath } = await import('../utils/dirs')
-    const configPath = diffWorkDir ? mihomoWorkConfigPath(current) : mihomoWorkConfigPath('work')
-    mihomoApiLogger.info(`config path: ${configPath}`)
-    const { existsSync } = await import('fs')
-    if (!existsSync(configPath)) {
-      mihomoApiLogger.info('config file does not exist, generating...')
-      const { generateProfile } = await import('./factory')
-      await generateProfile()
-    }
-    const response = await instance.put('/configs?force=true', {
-      path: configPath
-    })
-    mihomoApiLogger.info(`config upgrade request completed ${response?.status || 'no status'}`)
-  } catch (error) {
-    mihomoApiLogger.error('Failed to upgrade config', error)
-    throw error
-  }
+export const mihomoHotReloadConfig = async (): Promise<void> => {
+  mihomoApiLogger.info('mihomoHotReloadConfig called')
+  const current = await generateProfile()
+  const { diffWorkDir = false } = await getAppConfig()
+  const configPath = diffWorkDir ? mihomoWorkConfigPath(current) : mihomoWorkConfigPath('work')
+  mihomoApiLogger.info(`hot reload config path: ${configPath}`)
+  const instance = await getAxios()
+  await instance.put('/configs?force=true', { path: configPath })
+  mihomoApiLogger.info('hot reload config completed')
 }
 
 // Smart 内核 API

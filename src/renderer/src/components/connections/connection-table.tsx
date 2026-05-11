@@ -441,7 +441,7 @@ const ConnectionTable: React.FC<Props> = ({
                   return (
                     <td
                       key={col.key}
-                      className="px-3 text-sm text-foreground truncate"
+                      className="px-3 text-sm text-foreground truncate flag-emoji"
                       style={{ maxWidth: col.width }}
                       title={
                         typeof col.getValue(connection) === 'string'
