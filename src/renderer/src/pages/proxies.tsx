@@ -442,7 +442,6 @@ const Proxies: React.FC = () => {
                 selected={
                   allProxies[groupIndex][innerIndex * cols + i]?.name === groups[groupIndex].now
                 }
-                isGroupTesting={delaying[groupIndex]}
               />
             )
           })}
