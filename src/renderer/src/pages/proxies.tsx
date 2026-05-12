@@ -98,6 +98,7 @@ const Proxies: React.FC = () => {
   const { virtuosoRef, isOpen, setIsOpen } = useProxyState(groups)
   const [delaying, setDelaying] = useState(Array(groups.length).fill(false))
   const [searchValue, setSearchValue] = useState(Array(groups.length).fill(''))
+  const [testingProxies, setTestingProxies] = useState<Record<string, boolean>>({})
 
   // searchValue 初始化
   useEffect(() => {
@@ -201,6 +202,13 @@ const Proxies: React.FC = () => {
         return newDelaying
       })
 
+      // 标记组内所有代理为"测试中"
+      const initialTesting: Record<string, boolean> = {}
+      allProxies[index].forEach((p) => {
+        initialTesting[p.name] = true
+      })
+      setTestingProxies((prev) => ({ ...prev, ...initialTesting }))
+
       try {
         // 限制并发数量
         const result: Promise<void>[] = []
@@ -213,6 +221,8 @@ const Proxies: React.FC = () => {
               // ignore
             } finally {
               mutate()
+              // 该代理测试完成，取消其 loading 状态
+              setTestingProxies((prev) => ({ ...prev, [proxy.name]: false }))
             }
           })
           result.push(promise)
@@ -233,7 +243,7 @@ const Proxies: React.FC = () => {
         })
       }
     },
-    [allProxies, groups, delayTestConcurrency, mutate, setIsOpen]
+    [allProxies, groups, delayTestConcurrency, mutate, setIsOpen, setTestingProxies]
   )
 
   const calcCols = useCallback((): number => {
@@ -442,6 +452,9 @@ const Proxies: React.FC = () => {
                 selected={
                   allProxies[groupIndex][innerIndex * cols + i]?.name === groups[groupIndex].now
                 }
+                isProxyTesting={
+                  testingProxies[allProxies[groupIndex][innerIndex * cols + i]?.name] ?? false
+                }
               />
             )
           })}
@@ -460,7 +473,8 @@ const Proxies: React.FC = () => {
       delaying,
       mutate,
       onProxyDelay,
-      onChangeProxy
+      onChangeProxy,
+      testingProxies
     ]
   )
 
